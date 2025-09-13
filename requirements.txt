@@ -1,0 +1,8 @@
+speechrecognition==3.10.0
+pystray==0.19.4
+keyboard==0.13.5
+pyautogui==0.9.54
+Pillow==10.0.0
+pyaudio==0.2.11
+vosk==0.3.45
+sounddevice==0.5.2

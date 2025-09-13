@@ -1,0 +1,23 @@
+# Saved Audio Texts File
+# This file stores all texts saved using the F10 hotkey
+#
+# FORMAT:
+# Each saved text entry follows this format:
+# [TIMESTAMP] SOURCE: recorded_text_content
+#
+# TIMESTAMP FORMAT: YYYY-MM-DD HH:MM:SS
+# SOURCE: Either 'SPEECH' for voice recordings or 'MANUAL' for manually added entries
+#
+# EXAMPLES:
+# [2024-01-15 14:30:25] SPEECH: This is a sample recorded text from speech recognition
+# [2024-01-15 14:35:10] SPEECH: Another example of saved audio text
+#
+# NOTES:
+# - This file is automatically managed by the application
+# - Each new F10 recording will be appended to the end
+# - Newest entries appear at the bottom
+# - Do not manually edit the format unless you understand the structure
+# - You can manually add entries following the same format if needed
+#
+# SAVED TEXTS (entries appear below this line):
+

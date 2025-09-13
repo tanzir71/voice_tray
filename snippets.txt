@@ -1,0 +1,27 @@
+# Text Snippets Configuration File
+# This file manages text expansion snippets for the Audio Notetaker application
+#
+# FORMAT:
+# Each snippet should be on a separate line in the format:
+# trigger_word=expansion_text
+#
+# RULES:
+# - No spaces around the = sign
+# - Trigger words should be unique (no duplicates)
+# - Use \n for line breaks in expansion text
+# - Lines starting with # are comments and will be ignored
+# - Empty lines are ignored
+#
+# EXAMPLES:
+# addr=123 Main Street, City, State 12345
+# email=john.doe@example.com
+# sig=Best regards,\nJohn Doe\nSoftware Developer
+# phone=+1 (555) 123-4567
+#
+# HOW TO USE:
+# 1. Add your snippets below using the format above
+# 2. Save this file
+# 3. The application will automatically load changes
+# 4. Type the trigger word and it will be expanded to the full text
+#
+# YOUR SNIPPETS (add below this line):

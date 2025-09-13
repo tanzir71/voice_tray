@@ -1,0 +1,40 @@
+# Audio Notetaker Settings Configuration
+# This file contains all configurable settings for the application
+#
+# FORMAT:
+# setting_name=value
+#
+# HOTKEY FORMAT:
+# Use standard key names separated by + for combinations
+# Examples: f9, f10, ctrl+shift+s, alt+r, ctrl+alt+t
+# 
+# SUPPORTED KEY NAMES:
+# - Function keys: f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12
+# - Letters: a-z (case insensitive)
+# - Numbers: 0-9
+# - Modifiers: ctrl, alt, shift, win
+# - Special keys: space, enter, tab, esc, backspace, delete
+# - Arrow keys: up, down, left, right
+#
+# BOOLEAN VALUES:
+# Use 'true' or 'false' (case insensitive)
+#
+# SETTINGS EXPLANATION:
+# speech_hotkey: Key combination to record speech and type it (default: f9)
+# save_hotkey: Key combination to record speech and save to file (default: f10)
+# start_with_windows: Whether to start application when Windows starts (default: false)
+# auto_start_listening: Whether to automatically start listening on app launch (default: true)
+# notification_duration: How long notifications stay visible in seconds (default: 3)
+#
+# EXAMPLES:
+# speech_hotkey=ctrl+shift+r
+# save_hotkey=ctrl+shift+s
+# start_with_windows=true
+#
+# YOUR SETTINGS (modify values below):
+
+speech_hotkey=f9
+save_hotkey=f10
+start_with_windows=false
+auto_start_listening=true
+notification_duration=3
