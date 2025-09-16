@@ -25,3 +25,7 @@
 # 4. Type the trigger word and it will be expanded to the full text
 #
 # YOUR SNIPPETS (add below this line):
+
+address=123 Main Street, City, State 12345
+email=john.doe@example.com
+phone=+1 (555) 123-4567

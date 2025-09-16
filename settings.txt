@@ -35,6 +35,6 @@
 
 speech_hotkey=f9
 save_hotkey=f10
-start_with_windows=false
+start_with_windows=true
 auto_start_listening=true
 notification_duration=3

@@ -20,4 +20,3 @@
 # - You can manually add entries following the same format if needed
 #
 # SAVED TEXTS (entries appear below this line):
-
