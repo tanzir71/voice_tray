@@ -232,10 +232,28 @@
             font-size: 12px;
             background: #f3f3f6;
             border: 1px solid #e7e7ee;
+            border-radius: 10px;
+            padding: 0.08em 0.5em;
+            display: inline;
+            line-height: 1.2;
+            vertical-align: baseline;
+            white-space: nowrap;
+            -webkit-box-decoration-break: clone;
+            box-decoration-break: clone;
+            overflow-x: auto;
+            color: #0b0b0c;
+        }
+
+        .code-block {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace;
+            font-size: 12px;
+            background: #f3f3f6;
+            border: 1px solid #e7e7ee;
             border-radius: 12px;
             padding: 12px;
             overflow-x: auto;
             color: #0b0b0c;
+            margin-top: 8px;
         }
 
         .footer {
@@ -362,8 +380,21 @@
                 <div>
                     <div class="section-title">Setup</div>
                     <div class="list">
-                        <div class="list-item"><div class="dot"></div><div><strong>Install dependencies:</strong> <span class="code">pip install -r requirements.txt</span></div></div>
-                        <div class="list-item"><div class="dot"></div><div><strong>Run:</strong> <span class="code">run_app.bat</span> (recommended) or <span class="code">pythonw speech_to_text_app.py</span></div></div>
+                        <div class="list-item">
+                            <div class="dot"></div>
+                            <div>
+                                <strong>Install dependencies:</strong>
+                                <div class="code-block">pip install -r requirements.txt</div>
+                            </div>
+                        </div>
+                        <div class="list-item">
+                            <div class="dot"></div>
+                            <div>
+                                <strong>Run:</strong>
+                                <div class="code-block">run_app.bat</div>
+                                <div class="code-block">pythonw speech_to_text_app.py</div>
+                            </div>
+                        </div>
                         <div class="list-item"><div class="dot"></div><div><strong>Use:</strong> <span class="code">F9</span> to dictate into the active app, <span class="code">F10</span> to save a note.</div></div>
                         <div class="list-item"><div class="dot"></div><div><strong>Configure:</strong> open the tray menu → <strong>Settings</strong> (minimal GUI) or edit <span class="code">settings.txt</span>.</div></div>
                         <div class="list-item"><div class="dot"></div><div><strong>Optional local LLM cleanup:</strong> tray menu → <strong>LLM Setup</strong> to install runtime and choose a GGUF model path.</div></div>
