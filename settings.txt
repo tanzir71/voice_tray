@@ -54,3 +54,13 @@ notification_duration=3
 # llm_top_p=0.9
 # llm_threads=4
 # llm_gpu_layers=0
+
+llm_enabled=true
+
+llm_model_path=models/llm/model.gguf
+
+llm_n_ctx=2048
+
+llm_max_tokens=256
+
+llm_temperature=0.05

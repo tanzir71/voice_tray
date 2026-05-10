@@ -889,7 +889,7 @@ IMPORTANT: You must restart the application after making changes to any configur
             pystray.Menu.SEPARATOR,
             item('Settings', lambda icon, item: self.launch_settings_gui(None), default=True),
             item('LLM Setup', lambda icon, item: self.launch_settings_gui('llm')),
-            item('Instructions', self.show_instructions),
+            item('Instructions', lambda icon, item: self.launch_settings_gui('help')),
             pystray.Menu.SEPARATOR,
             item('Open Folder', self.open_app_folder),
             item('Quit', self.quit_app)
