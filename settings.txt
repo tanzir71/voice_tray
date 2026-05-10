@@ -38,3 +38,19 @@ save_hotkey=f10
 start_with_windows=true
 auto_start_listening=true
 notification_duration=3
+
+# Dictation intelligence (offline-first)
+# dictation_mode=balanced
+# format_profile=general
+# glossary_path=glossary.json
+# app_profiles_path=app_profiles.json
+
+# Local LLM cleanup (optional)
+# llm_enabled=false
+# llm_model_path=models/llm/model.gguf
+# llm_n_ctx=2048
+# llm_max_tokens=256
+# llm_temperature=0.05
+# llm_top_p=0.9
+# llm_threads=4
+# llm_gpu_layers=0

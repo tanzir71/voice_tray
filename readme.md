@@ -15,6 +15,7 @@ A Python application that runs in the system tray and converts speech to text, i
   - **Repetition Detection**: Automatically removes duplicate words and phrases
   - **Grammar Checking**: Applies basic grammar corrections and capitalization
   - **Similarity Filtering**: Prevents processing of nearly identical repeated inputs
+  - **Hybrid Dictation Cleanup**: Rule-based cleanup + optional on-device LLM validation fallback
 - **Text File Storage**: Save recognized texts to simple text files
 - **Text Expansion**: Support for custom snippets that expand trigger words into full text
 - **Configurable Settings**: Customize hotkeys and startup options via settings.txt
@@ -103,6 +104,9 @@ VoiceTray stores all recognized text in simple text files with timestamps and so
 - **Repetition Removal**: Eliminates repeated phrases and words
 - **Similarity Detection**: Prevents saving nearly identical text entries
 - **Text Expansion**: Automatically expands predefined snippets from snippets.txt
+- **Dictation Modes**: raw / balanced / aggressive cleanup modes
+- **Formatting Profiles**: general / email / chat / notes / code/comments
+- **Personal Glossary**: protected terms and replacements via glossary.json
 - **Configurable Settings**: Customize hotkeys and behavior via settings.txt
 
 ## Troubleshooting
@@ -161,6 +165,30 @@ When text is processed, you'll see console output showing:
 Original: hello hello world i cant do this
 Processed: Hello world I can't do this
 ```
+
+## Hybrid Local Dictation Pipeline
+
+VoiceTray cleans transcripts in three stages:
+
+1. **Rule cleanup** (deterministic): whitespace, repetition cleanup, conservative normalization, optional list formatting.
+2. **Optional on-device LLM cleanup**: very strict prompt; returns JSON only.
+3. **Validation + fallback**: rejects risky edits (numbers/glossary/too-different) and falls back to rule output.
+
+To enable local LLM cleanup, install an on-device runtime and point to a GGUF model:
+
+```bash
+pip install llama-cpp-python
+```
+
+Then set in `settings.txt`:
+
+- `llm_enabled=true`
+- `llm_model_path=...` (GGUF path)
+
+VoiceTray also includes a minimal optional Settings GUI:
+
+- If `llm_enabled=true` but the runtime/model isn’t ready, it will open the Settings GUI on launch (Local LLM tab).
+- You can open it anytime from the tray menu: **Settings** or **LLM Setup**.
 
 ## Technical Details
 

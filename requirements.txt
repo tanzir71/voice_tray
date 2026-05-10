@@ -6,3 +6,4 @@ Pillow==10.0.0
 pyaudio==0.2.11
 vosk==0.3.45
 sounddevice==0.5.2
+pytest==8.3.2

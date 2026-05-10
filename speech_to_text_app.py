@@ -18,6 +18,10 @@ from difflib import SequenceMatcher
 from datetime import datetime
 import tkinter as tk
 from tkinter import ttk, scrolledtext
+import subprocess
+
+from dictation import DictationConfig, DictationContext, DictationPipeline
+from dictation.llm_local import LocalLLMConfig
 
 class VoiceTrayApp:
     def __init__(self):
@@ -58,6 +62,10 @@ class VoiceTrayApp:
         
         # Load snippets from file
         self.load_snippets_from_file()
+
+        self.load_app_profiles()
+        self.init_dictation_pipeline()
+        self.prompt_llm_setup_if_needed()
     
     def create_icon_image(self):
         """Create a simple icon for the system tray"""
@@ -186,15 +194,10 @@ class VoiceTrayApp:
         if self.check_similarity_with_recent(raw_text):
             print("Skipping similar text to avoid repetition")
             return None
-        
-        # Remove repetitions
-        cleaned_text = self.remove_repetitions(raw_text)
-        
-        # Apply basic grammar checking
-        grammar_checked_text = self.basic_grammar_check(cleaned_text)
-        
-        # Expand snippets
-        final_text = self.expand_snippets(grammar_checked_text)
+
+        context = self.select_dictation_context()
+        final_text = self.dictation_pipeline.process_transcript(raw_text, context)
+        final_text = self.expand_snippets(final_text)
         
         # Store in recent texts for future comparison
         self.recent_texts.append(final_text)
@@ -206,6 +209,22 @@ class VoiceTrayApp:
     def load_settings(self):
         """Load settings from settings.txt file"""
         try:
+            self.auto_start_listening = True
+            self.notification_duration = 3
+            self.dictation_mode = 'balanced'
+            self.format_profile = 'general'
+            self.glossary_path = os.path.join(os.path.dirname(__file__), 'glossary.json')
+            self.app_profiles_path = os.path.join(os.path.dirname(__file__), 'app_profiles.json')
+
+            self.llm_enabled = False
+            self.llm_model_path = os.path.join(os.path.dirname(__file__), 'models', 'llm', 'model.gguf')
+            self.llm_n_ctx = 2048
+            self.llm_max_tokens = 256
+            self.llm_temperature = 0.05
+            self.llm_top_p = 0.9
+            self.llm_threads = None
+            self.llm_gpu_layers = None
+
             settings_path = os.path.join(os.path.dirname(__file__), 'settings.txt')
             if os.path.exists(settings_path):
                 with open(settings_path, 'r', encoding='utf-8') as f:
@@ -224,6 +243,30 @@ class VoiceTrayApp:
                                 self.auto_start_listening = value.lower() == 'true'
                             elif key == 'notification_duration':
                                 self.notification_duration = int(value)
+                            elif key == 'dictation_mode':
+                                self.dictation_mode = value.lower()
+                            elif key == 'format_profile':
+                                self.format_profile = value.lower()
+                            elif key == 'glossary_path':
+                                self.glossary_path = value
+                            elif key == 'app_profiles_path':
+                                self.app_profiles_path = value
+                            elif key == 'llm_enabled':
+                                self.llm_enabled = value.lower() == 'true'
+                            elif key == 'llm_model_path':
+                                self.llm_model_path = value
+                            elif key == 'llm_n_ctx':
+                                self.llm_n_ctx = int(value)
+                            elif key == 'llm_max_tokens':
+                                self.llm_max_tokens = int(value)
+                            elif key == 'llm_temperature':
+                                self.llm_temperature = float(value)
+                            elif key == 'llm_top_p':
+                                self.llm_top_p = float(value)
+                            elif key == 'llm_threads':
+                                self.llm_threads = int(value)
+                            elif key == 'llm_gpu_layers':
+                                self.llm_gpu_layers = int(value)
                                 
             print(f"Settings loaded: speech_hotkey={self.hotkey}, save_hotkey={self.save_hotkey}")
         except Exception as e:
@@ -246,10 +289,132 @@ class VoiceTrayApp:
             if not os.path.exists(snippets_path):
                 with open(snippets_path, 'w', encoding='utf-8') as f:
                     f.write("# YOUR SNIPPETS (add below this line):\n\n")
+
+            glossary_path = os.path.join(os.path.dirname(__file__), 'glossary.json')
+            if not os.path.exists(glossary_path):
+                with open(glossary_path, 'w', encoding='utf-8') as f:
+                    json.dump({"user_terms": [], "protected_terms": [], "replacements": {}}, f, indent=2)
+
+            app_profiles_path = os.path.join(os.path.dirname(__file__), 'app_profiles.json')
+            if not os.path.exists(app_profiles_path):
+                with open(app_profiles_path, 'w', encoding='utf-8') as f:
+                    json.dump([], f, indent=2)
                     
             print("Text files initialized successfully")
         except Exception as e:
             print(f"Error initializing text files: {e}")
+
+    def init_dictation_pipeline(self):
+        llm_cfg = LocalLLMConfig(
+            enabled=bool(self.llm_enabled),
+            model_path=self.llm_model_path,
+            n_ctx=int(self.llm_n_ctx),
+            max_tokens=int(self.llm_max_tokens),
+            temperature=float(self.llm_temperature),
+            top_p=float(self.llm_top_p),
+            n_threads=self.llm_threads,
+            n_gpu_layers=self.llm_gpu_layers,
+        )
+        cfg = DictationConfig(glossary_path=self.glossary_path, llm=llm_cfg)
+        self.dictation_pipeline = DictationPipeline(cfg)
+
+    def llm_setup_status(self):
+        if not getattr(self, 'llm_enabled', False):
+            return True, 'disabled'
+        model_path = getattr(self, 'llm_model_path', '')
+        if not model_path:
+            return False, 'missing_model_path'
+        if not os.path.exists(model_path):
+            return False, 'model_not_found'
+        if not getattr(self, 'dictation_pipeline', None):
+            return False, 'pipeline_not_ready'
+        if not self.dictation_pipeline.llm.available():
+            return False, 'llama_cpp_missing'
+        return True, 'ok'
+
+    def launch_settings_gui(self, initial_tab=None):
+        try:
+            gui_path = os.path.join(os.path.dirname(__file__), 'voicetray_settings_gui.py')
+            if not os.path.exists(gui_path):
+                return False
+            args = [sys.executable, gui_path]
+            if initial_tab:
+                args.extend(['--tab', initial_tab])
+
+            if sys.platform == 'win32':
+                DETACHED_PROCESS = 0x00000008
+                CREATE_NEW_PROCESS_GROUP = 0x00000200
+                subprocess.Popen(
+                    args,
+                    cwd=os.path.dirname(__file__),
+                    creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
+                )
+            else:
+                subprocess.Popen(args, cwd=os.path.dirname(__file__))
+            return True
+        except Exception as e:
+            print(f"Could not launch settings GUI: {e}")
+            return False
+
+    def prompt_llm_setup_if_needed(self):
+        ok, reason = self.llm_setup_status()
+        if ok:
+            return
+        try:
+            threading.Timer(1.0, lambda: self.launch_settings_gui('llm')).start()
+        except Exception:
+            pass
+
+    def load_app_profiles(self):
+        self.app_profiles = []
+        try:
+            path = getattr(self, 'app_profiles_path', os.path.join(os.path.dirname(__file__), 'app_profiles.json'))
+            if not path or not os.path.exists(path):
+                return
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            if isinstance(data, list):
+                self.app_profiles = [d for d in data if isinstance(d, dict)]
+        except Exception as e:
+            print(f"Error loading app profiles: {e}")
+
+    def get_active_window_title(self):
+        if sys.platform != "win32":
+            return None
+        try:
+            import ctypes
+
+            user32 = ctypes.windll.user32
+            hwnd = user32.GetForegroundWindow()
+            length = user32.GetWindowTextLengthW(hwnd)
+            buf = ctypes.create_unicode_buffer(length + 1)
+            user32.GetWindowTextW(hwnd, buf, length + 1)
+            title = buf.value
+            return title or None
+        except Exception:
+            return None
+
+    def select_dictation_context(self):
+        title = self.get_active_window_title()
+        mode = self.dictation_mode
+        profile = self.format_profile
+        if title and getattr(self, 'app_profiles', None):
+            lowered = title.lower()
+            for entry in self.app_profiles:
+                match = entry.get('match')
+                if isinstance(match, str) and match and match.lower() in lowered:
+                    entry_mode = entry.get('mode')
+                    entry_profile = entry.get('profile')
+                    if isinstance(entry_mode, str) and entry_mode:
+                        mode = entry_mode.lower()
+                    if isinstance(entry_profile, str) and entry_profile:
+                        profile = entry_profile.lower()
+                    break
+        if mode not in ('raw', 'balanced', 'aggressive'):
+            mode = 'balanced'
+        if profile not in ('general', 'email', 'chat', 'notes', 'code/comments'):
+            profile = 'general'
+        return DictationContext(mode=mode, profile=profile, app_title=title)
     
     def save_text_to_file(self, text):
         """Save recognized text to saved_texts.txt file"""
@@ -611,9 +776,31 @@ class VoiceTrayApp:
   - auto_start_listening: Auto-start on launch (default: true)
   - notification_duration: Notification time in seconds (default: 3)
 
+  Dictation intelligence:
+  - dictation_mode: raw | balanced | aggressive (default: balanced)
+  - format_profile: general | email | chat | notes | code/comments (default: general)
+  - glossary_path: Path to glossary.json (default: glossary.json)
+  - app_profiles_path: Path to app_profiles.json (default: app_profiles.json)
+  - llm_enabled: true/false (default: false)
+  - llm_model_path: Path to local GGUF model
+  - llm_n_ctx: Context size (default: 2048)
+  - llm_max_tokens: Output limit (default: 256)
+  - llm_temperature: Keep near zero (default: 0.05)
+  - llm_top_p: Sampling control (default: 0.9)
+  - llm_threads: Optional int
+  - llm_gpu_layers: Optional int
+
 • snippets.txt - Add text expansion shortcuts
   - Format: trigger=expansion_text
   - Example: addr=123 Main Street, City, State
+
+• glossary.json - Personal dictionary and protected terms
+  - user_terms: preferred terms (kept stable)
+  - protected_terms: never rewrite
+  - replacements: common misrecognitions to replace
+
+• app_profiles.json - Per-app mode/profile overrides
+  - Example entry: {"match": "Visual Studio Code", "profile": "code/comments", "mode": "raw"}
 
 • saved_texts.txt - View your saved recordings
   - Contains timestamped speech recordings from F10
@@ -697,7 +884,12 @@ IMPORTANT: You must restart the application after making changes to any configur
     def create_menu(self):
         """Create the system tray menu"""
         return pystray.Menu(
-            item('Instructions', self.show_instructions, default=True),
+            item('Start Listening', self.start_listening, enabled=lambda _item: not self.is_listening),
+            item('Stop Listening', self.stop_listening, enabled=lambda _item: self.is_listening),
+            pystray.Menu.SEPARATOR,
+            item('Settings', lambda icon, item: self.launch_settings_gui(None), default=True),
+            item('LLM Setup', lambda icon, item: self.launch_settings_gui('llm')),
+            item('Instructions', self.show_instructions),
             pystray.Menu.SEPARATOR,
             item('Open Folder', self.open_app_folder),
             item('Quit', self.quit_app)
@@ -719,8 +911,8 @@ IMPORTANT: You must restart the application after making changes to any configur
         print(f"Press {self.hotkey} to record speech.")
         print("Application is now running in the background. Close this window safely.")
         
-        # Auto-start listening
-        self.start_listening()
+        if getattr(self, 'auto_start_listening', True):
+            self.start_listening()
         
         # Register cleanup function
         atexit.register(self.cleanup)
