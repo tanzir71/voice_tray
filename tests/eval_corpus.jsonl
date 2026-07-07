@@ -1,0 +1,42 @@
+{"id":"raw-general-01","mode":"raw","profile":"general","input":"um hello hello world","expected":"um hello hello world"}
+{"id":"raw-notes-01","mode":"raw","profile":"notes","input":"one apples two bananas","expected":"one apples two bananas"}
+{"id":"raw-code-01","mode":"raw","profile":"code/comments","input":"def foo open paren close paren","expected":"def foo open paren close paren"}
+{"id":"raw-email-01","mode":"raw","profile":"email","input":"hello new paragraph world","expected":"hello new paragraph world"}
+{"id":"raw-chat-01","mode":"raw","profile":"chat","input":"like hello hello","expected":"like hello hello"}
+{"id":"balanced-general-01","mode":"balanced","profile":"general","input":"um hello hello world","expected":"Hello world"}
+{"id":"balanced-general-02","mode":"balanced","profile":"general","input":"ah this is like a good idea","expected":"This is like a good idea"}
+{"id":"balanced-general-03","mode":"balanced","profile":"general","input":"send it to John actually Jane","expected":"Send it to John actually Jane"}
+{"id":"balanced-general-04","mode":"balanced","profile":"general","input":"hello comma world","expected":"Hello comma world"}
+{"id":"balanced-general-05","mode":"balanced","profile":"general","input":"opening thought new paragraph next thought","expected":"Opening thought new paragraph next thought"}
+{"id":"balanced-email-01","mode":"balanced","profile":"email","input":"hello comma team","expected":"Hello comma team."}
+{"id":"balanced-email-02","mode":"balanced","profile":"email","input":"opening thought new paragraph next thought","expected":"Opening thought\n\nNext thought."}
+{"id":"balanced-email-03","mode":"balanced","profile":"email","input":"one apples two bananas three carrots","expected":"1. Apples\n2. Bananas\n3. Carrots"}
+{"id":"balanced-email-04","mode":"balanced","profile":"email","input":"um please review this","expected":"Please review this."}
+{"id":"balanced-email-05","mode":"balanced","profile":"email","input":"thanks for your help","expected":"Thanks for your help."}
+{"id":"balanced-notes-01","mode":"balanced","profile":"notes","input":"one apples two bananas three carrots","expected":"1. Apples\n2. Bananas\n3. Carrots"}
+{"id":"balanced-notes-02","mode":"balanced","profile":"notes","input":"bullet point apples bullet point bananas","expected":"- Apples\n- Bananas"}
+{"id":"balanced-notes-03","mode":"balanced","profile":"notes","input":"first apples second bananas third carrots","expected":"1. Apples\n2. Bananas\n3. Carrots"}
+{"id":"balanced-notes-04","mode":"balanced","profile":"notes","input":"opening thought new paragraph next thought","expected":"Opening thought\n\nNext thought"}
+{"id":"balanced-notes-05","mode":"balanced","profile":"notes","input":"hmm meeting notes meeting notes","expected":"Meeting notes"}
+{"id":"balanced-chat-01","mode":"balanced","profile":"chat","input":"um hello hello there","expected":"Hello there"}
+{"id":"balanced-chat-02","mode":"balanced","profile":"chat","input":"like I think we can ship","expected":"Like I think we can ship"}
+{"id":"balanced-chat-03","mode":"balanced","profile":"chat","input":"you know we should ship this","expected":"You know we should ship this"}
+{"id":"balanced-chat-04","mode":"balanced","profile":"chat","input":"make it red no wait blue","expected":"Make it red no wait blue"}
+{"id":"balanced-chat-05","mode":"balanced","profile":"chat","input":"thanks comma talk soon","expected":"Thanks comma talk soon"}
+{"id":"balanced-code-01","mode":"balanced","profile":"code/comments","input":"um hello hello world","expected":"um hello world"}
+{"id":"balanced-code-02","mode":"balanced","profile":"code/comments","input":"print hello comma world","expected":"print hello comma world"}
+{"id":"balanced-code-03","mode":"balanced","profile":"code/comments","input":"one apples two bananas","expected":"one apples two bananas"}
+{"id":"aggressive-general-01","mode":"aggressive","profile":"general","input":"um like hello hello world","expected":"Hello world"}
+{"id":"aggressive-general-02","mode":"aggressive","profile":"general","input":"set the meeting for two actually three","expected":"Set the meeting for three"}
+{"id":"aggressive-general-03","mode":"aggressive","profile":"general","input":"hello comma world","expected":"Hello, world"}
+{"id":"aggressive-general-04","mode":"aggressive","profile":"general","input":"I sort of think this works","expected":"I think this works"}
+{"id":"aggressive-general-05","mode":"aggressive","profile":"general","input":"this is basically ready","expected":"This is ready"}
+{"id":"aggressive-email-01","mode":"aggressive","profile":"email","input":"um like hello team","expected":"Hello team."}
+{"id":"aggressive-email-02","mode":"aggressive","profile":"email","input":"one apples two bananas","expected":"1. Apples\n2. Bananas"}
+{"id":"aggressive-email-03","mode":"aggressive","profile":"email","input":"opening thought new paragraph next thought","expected":"Opening thought\n\nNext thought."}
+{"id":"aggressive-notes-01","mode":"aggressive","profile":"notes","input":"bullet apples bullet bananas","expected":"- Apples\n- Bananas"}
+{"id":"aggressive-notes-02","mode":"aggressive","profile":"notes","input":"number one apples number two bananas","expected":"1. Apples\n2. Bananas"}
+{"id":"aggressive-notes-03","mode":"aggressive","profile":"notes","input":"new line apples new line bananas","expected":"Apples\nBananas"}
+{"id":"aggressive-chat-01","mode":"aggressive","profile":"chat","input":"you know we should ship this","expected":"We should ship this"}
+{"id":"aggressive-chat-02","mode":"aggressive","profile":"chat","input":"make it red no wait blue","expected":"Make it blue"}
+{"id":"aggressive-code-01","mode":"aggressive","profile":"code/comments","input":"like hello hello world","expected":"like hello world"}

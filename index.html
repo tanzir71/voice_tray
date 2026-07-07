@@ -337,15 +337,15 @@
                 </div>
                 <div class="card">
                     <h3>Offline speech-to-text</h3>
-                    <p>Uses Vosk locally for fast dictation without sending audio anywhere. Online STT remains optional fallback when configured.</p>
+                    <p>Uses faster-whisper locally for dictation without sending audio anywhere. There is no cloud fallback during dictation.</p>
                 </div>
                 <div class="card">
                     <h3>Snippet expansion</h3>
                     <p>Expand short triggers into full text using <span class="code">snippets.txt</span> after cleanup.</p>
                 </div>
                 <div class="card">
-                    <h3>Notes with timestamps</h3>
-                    <p>Save clean transcripts to <span class="code">saved_texts.txt</span> for quick capture and later review.</p>
+                    <h3>Local history</h3>
+                    <p>Keep raw and cleaned dictations in local SQLite history for quick capture, search, copy, and re-insert.</p>
                 </div>
                 <div class="card">
                     <h3>Personal glossary</h3>
@@ -392,12 +392,12 @@
                             <div>
                                 <strong>Run:</strong>
                                 <div class="code-block">run_app.bat</div>
-                                <div class="code-block">pythonw speech_to_text_app.py</div>
+                                <div class="code-block">pythonw -m voicetray</div>
                             </div>
                         </div>
-                        <div class="list-item"><div class="dot"></div><div><strong>Use:</strong> <span class="code">F9</span> to dictate into the active app, <span class="code">F10</span> to save a note.</div></div>
-                        <div class="list-item"><div class="dot"></div><div><strong>Configure:</strong> open the tray menu → <strong>Settings</strong> (minimal GUI) or edit <span class="code">settings.txt</span>.</div></div>
-                        <div class="list-item"><div class="dot"></div><div><strong>Optional local LLM cleanup:</strong> tray menu → <strong>LLM Setup</strong> to install runtime and choose a GGUF model path.</div></div>
+                        <div class="list-item"><div class="dot"></div><div><strong>Use:</strong> <span class="code">F9</span> to dictate into the active app, <span class="code">F10</span> to capture to History without inserting.</div></div>
+                        <div class="list-item"><div class="dot"></div><div><strong>Configure:</strong> open the tray menu → <strong>Settings</strong> for hotkeys, cleanup, dictionaries, snippets, and models.</div></div>
+                        <div class="list-item"><div class="dot"></div><div><strong>Optional local LLM cleanup:</strong> use <strong>Settings</strong> → <strong>Models</strong> to choose a GGUF model path.</div></div>
                     </div>
                 </div>
                 <div class="card">

@@ -1,235 +1,144 @@
 # VoiceTray
 
-**Expand your words, save your thoughts.**
+**Wispr Flow magic, 100% offline and free.**
 
-A Python application that runs in the system tray and converts speech to text, inserting it into any active input field when a hotkey is pressed or saving it to text files.
+VoiceTray is a Windows tray dictation app that lets you speak messily and inserts clean, ready-to-send text into the app you were already using. It runs local speech recognition with faster-whisper, keeps raw and cleaned dictations in local SQLite history, and never sends your voice or text to a cloud service during dictation.
 
-## Features
+![VoiceTray dictation pill](assets/readme/pill-preview.gif)
 
-- **System Tray Integration**: Minimizes to system tray for easy access
-- **Global Hotkey**: Press `F9` to start speech recognition
-- **Universal Text Input**: Works with any application's input fields
-- **Offline Speech Recognition**: Uses Vosk for instant, network-free recognition
-- **Online Fallback**: Falls back to Google's speech recognition if offline model unavailable
-- **Smart Text Processing**: 
-  - **Repetition Detection**: Automatically removes duplicate words and phrases
-  - **Grammar Checking**: Applies basic grammar corrections and capitalization
-  - **Similarity Filtering**: Prevents processing of nearly identical repeated inputs
-  - **Hybrid Dictation Cleanup**: Rule-based cleanup + optional on-device LLM validation fallback
-- **Text File Storage**: Save recognized texts to simple text files
-- **Text Expansion**: Support for custom snippets that expand trigger words into full text
-- **Configurable Settings**: Customize hotkeys and startup options via settings.txt
-- **Simple Controls**: Start/stop listening via tray menu
+## What You Get
 
-## Installation
+- Hold `F9` to dictate into Notepad, VS Code, Chrome textareas, Slack, terminals, and most Windows input fields.
+- Short-tap `F9` for hands-free lock mode; tap `F9` again or press `Esc` to stop.
+- Use `F10` to capture a dictation into local History without typing into the foreground app.
+- See a floating dictation pill with live microphone level, elapsed time, processing state, and brief error feedback.
+- Browse raw vs cleaned dictations in History, copy or reinsert text, and add selected words to the personal dictionary.
+- Configure hotkeys, autostart, cleanup modes, app profiles, dictionary, snippets, and models from the in-process Settings window.
+- Stay offline at runtime: local STT, local cleanup rules, optional local GGUF cleanup model, local logs, and local history.
 
-### Prerequisites
+## Honest Comparison
 
-- Python 3.7 or higher
-- Microphone access
-- Internet connection (for Google Speech Recognition)
+VoiceTray aims for the feel of polished cloud dictation while taking the opposite privacy and pricing tradeoff.
 
-### Step 1: Install Python Dependencies
+| Capability | Wispr Flow | Typeless | VoiceTray |
+|---|---|---|---|
+| STT engine | Cloud OpenAI/Meta models, about 97% accuracy | Cloud STT with auto language detection | Local faster-whisper with `base`, `small`, and `medium` choices |
+| Recording model | Hold-hotkey push-to-talk plus hands-free lock; 6-minute cap | Hold-hotkey push-to-talk | Hold-to-talk plus toggle lock mode; 10-minute soft cap |
+| Filler removal | Automatic | Automatic | Rules plus optional local LLM cleanup |
+| Backtrack and self-correction | Core feature | Core feature | Rule handling plus optional validation-guarded local LLM cleanup |
+| Repetition removal | Yes | Yes | Yes |
+| Auto punctuation and capitalization | Yes | Yes | Whisper plus cleanup rules |
+| Spoken punctuation and new lines | Yes | Yes | Yes |
+| Auto lists | Yes | Yes | Yes |
+| App-specific tone | Styles and context | Tone presets | Per-app profiles for general, email, chat, notes, and code comments |
+| Personal dictionary | Learns corrections | Yes | Local glossary with History-to-dictionary action |
+| Snippets | Yes | No | Local snippet expansion |
+| Command mode | Yes | No | Not in v1 |
+| Code and IDE awareness | Strong | Limited | Conservative code/comments profile |
+| Quiet speech | Supported | Not highlighted | Best-effort; use Windows input gain if needed |
+| Languages | 100+ | 100+ with auto-detect | Whisper multilingual with language setting or auto |
+| History | Dashboard | Yes | Local History window with raw/clean toggle |
+| Privacy | Cloud dictation | Cloud dictation | 100% offline |
+| Price | $15/mo | $12/mo | Free, open source |
 
-```bash
+## Install
+
+### Packaged App
+
+1. Run `tools\build.ps1` to create the one-folder Windows app.
+2. Launch `dist\VoiceTray\VoiceTray.exe`.
+3. The first-run wizard checks your microphone, downloads the selected Whisper model, and walks through the hotkey flow.
+
+The packaged app keeps external assets and models beside the executable:
+
+```text
+dist\VoiceTray\VoiceTray.exe
+dist\VoiceTray\assets\
+dist\VoiceTray\models\
+```
+
+### From Source
+
+```powershell
 pip install -r requirements.txt
+pythonw -m voicetray
 ```
 
-### Step 2: Install PyAudio (Windows)
+Use `python -m voicetray` or `run_debug.bat` when you want a visible console and debug logs.
 
-If you encounter issues with PyAudio installation on Windows, try:
+## Model Size Guidance
 
-```bash
-pip install pipwin
-pipwin install pyaudio
-```
+VoiceTray downloads models only when you choose them during onboarding or in Settings -> Models.
 
-Alternatively, download the appropriate `.whl` file from [here](https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyaudio) and install it:
+| Model | Size | Best For | Notes |
+|---|---:|---|---|
+| `base` | base (~145 MB) | Default daily dictation | Fast, good enough for most notes and chat, uses int8 compute |
+| `small` | small (better accuracy) | More accurate writing and names | Slower than base; VoiceTray warns if it misses the local performance budget |
+| `medium` | medium (best CPU-viable accuracy) | Highest local STT quality | Best for patient desktop CPUs; expect larger download and slower first use |
 
-```bash
-pip install PyAudio-0.2.11-cp39-cp39-win_amd64.whl
-```
+Optional cleanup tier: install a local GGUF runtime and point Settings -> Models at `Qwen2.5-1.5B-Instruct` `Q4_K_M` (~1 GB). VoiceTray validates local LLM edits and falls back to deterministic rules when an edit looks risky.
 
-## Usage
+## Daily Use
 
-### Starting the Application
+1. Click where text should go.
+2. Hold `F9`, speak, then release.
+3. VoiceTray transcribes locally, cleans the text, writes raw and cleaned versions to History, and inserts the cleaned version into the focused app.
 
-**Option 1: Using the batch file (Recommended)**
-1. Double-click `run_app.bat`
-2. The application will start in background mode
-3. You can safely close the console window after startup
+Long recordings warn at 9 minutes and stop at 10 minutes to keep memory bounded. If the focused app changes before insertion, VoiceTray skips unsafe typing and leaves the dictation in History.
 
-**Option 2: Command line**
-1. For background mode: `pythonw speech_to_text_app.py`
-2. For console mode: `python speech_to_text_app.py`
+## Tray Menu
 
-**After starting:**
-- The application will minimize to the system tray (look for a microphone icon)
-- The application automatically starts listening when launched
-- **Important**: The app runs independently - you can close the Python file/console window
+- **Start Listening / Stop Listening** toggles global hotkeys.
+- **History** opens the local raw/clean dictation browser.
+- **Settings** opens hotkeys, cleanup, dictionary, snippets, models, autostart, and About.
+- **Open Log Folder** opens `%LOCALAPPDATA%\VoiceTray\logs`.
+- **Quit** exits the app.
 
-### Using Speech-to-Text
+## Local Files
 
-1. Click on any input field in any application (text editor, browser, chat app, etc.)
-2. Press `F9` to start recording
-3. Speak clearly into your microphone (recording lasts up to 5 seconds)
-4. The recognized text will be automatically typed into the active input field
+- Config: `%LOCALAPPDATA%\VoiceTray\config.json`
+- Logs: `%LOCALAPPDATA%\VoiceTray\logs\voicetray.log`
+- History: `%LOCALAPPDATA%\VoiceTray\history.db`
+- Packaged models: `dist\VoiceTray\models`
 
-### Alternative: Save to Database
-1. Press `F10` to record speech and save directly to database
-2. A temporary notification will show what was saved
-3. Access saved texts via the system tray menu
-
-### Tray Menu Options
-
-VoiceTray provides a system tray icon with the following options:
-- **Start Listening**: Activates the speech recognition hotkey
-- **Stop Listening**: Deactivates the speech recognition hotkey
-- **Settings**: View current hotkey (more options coming soon)
-- **Quit**: Exit the application
-
-## Text Storage and Processing
-
-### Saving Texts
-- Use **F10** to record speech and save directly to text files
-- Shows temporary notification with saved text preview
-- Each saved text includes timestamp and source information
-- Texts are automatically processed (repetition removal, grammar checking) before saving
-- No text is typed to screen when using F10 (save-only mode)
-
-### Text Processing Features
-VoiceTray stores all recognized text in simple text files with timestamps and source information. Text processing includes:
-
-- **Grammar Enhancement**: Basic grammar corrections and capitalization
-- **Repetition Removal**: Eliminates repeated phrases and words
-- **Similarity Detection**: Prevents saving nearly identical text entries
-- **Text Expansion**: Automatically expands predefined snippets from snippets.txt
-- **Dictation Modes**: raw / balanced / aggressive cleanup modes
-- **Formatting Profiles**: general / email / chat / notes / code/comments
-- **Personal Glossary**: protected terms and replacements via glossary.json
-- **Configurable Settings**: Customize hotkeys and behavior via settings.txt
+VoiceTray has no telemetry and no cloud fallback for dictation. Network access is only used for explicit model downloads that you start from onboarding or Settings.
 
 ## Troubleshooting
 
-### Common Issues
+**No microphone**
 
-1. **No microphone detected**:
-   - Ensure your microphone is connected and working
-   - Check Windows privacy settings for microphone access
-   - Try running the application as administrator
+- Check Windows microphone privacy permissions.
+- Unplug and reconnect the device; VoiceTray retries the default input stream and shows a no-microphone tray state when needed.
+- Open Settings after reconnecting if Windows changed the default input device.
 
-2. **Speech recognition not working**:
-   - Check your internet connection
-   - Ensure you're speaking clearly and loudly enough
-   - Try adjusting microphone sensitivity in Windows settings
+**Hotkey does not respond**
 
-3. **Hotkey not responding**:
-   - Make sure "Start Listening" is enabled in the tray menu
-   - Check if another application is using the F9 key
-   - Try running the application as administrator
+- Confirm VoiceTray is running in the tray.
+- Check Settings for a hotkey conflict.
+- Try running as administrator if another elevated app has focus.
 
-4. **Application exits when closing console**:
-   - Use `pythonw speech_to_text_app.py` instead of `python`
-   - Or use the provided `run_app.bat` file
-   - The app is designed to run independently in the background
+**Text does not insert**
 
-4. **Text not inserting**:
-   - Ensure the target input field is active (cursor blinking)
-   - Some applications may block automated text input
-   - Try clicking in the input field before using the hotkey
+- Click the target field again and retry.
+- Check History; VoiceTray stores dictation before insertion so the text is still available.
+- Some terminal or remote-desktop contexts may need the fallback typing path.
 
-### Error Messages
+**Model download or first dictation is slow**
 
-- **"Error with speech recognition service"**: Check internet connection
-- **"Could not understand audio"**: Speak more clearly or adjust microphone
-- **"No speech detected"**: Ensure microphone is working and speak louder
+- Start with `base`.
+- Use `small` only if accuracy matters more than latency on this machine.
+- Keep `medium` for quality-sensitive work on faster CPUs.
 
-## Text Processing Features
+## Development Checks
 
-### Repetition Detection
-The application automatically detects and removes:
-- **Consecutive duplicate words**: "the the cat" → "the cat"
-- **Repeated phrases**: "hello world hello world" → "hello world"
-- **Similar recent inputs**: Prevents processing nearly identical text within recent history
-
-### Grammar Checking
-Basic grammar corrections include:
-- **Capitalization**: First letter of sentences
-- **Contractions**: "cant" → "can't", "im" → "I'm", "wont" → "won't"
-- **Pronoun correction**: "i" → "I"
-- **Punctuation spacing**: Proper spacing around commas, periods, etc.
-
-### Processing Output
-When text is processed, you'll see console output showing:
+```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+$env:QT_QPA_PLATFORM='offscreen'
+python -B -m pytest tests\ -q
+python -B -m voicetray.eval
+python -B tools\soak.py --cycles 50 --target synthetic
 ```
-Original: hello hello world i cant do this
-Processed: Hello world I can't do this
-```
-
-## Hybrid Local Dictation Pipeline
-
-VoiceTray cleans transcripts in three stages:
-
-1. **Rule cleanup** (deterministic): whitespace, repetition cleanup, conservative normalization, optional list formatting.
-2. **Optional on-device LLM cleanup**: very strict prompt; returns JSON only.
-3. **Validation + fallback**: rejects risky edits (numbers/glossary/too-different) and falls back to rule output.
-
-To enable local LLM cleanup, install an on-device runtime and point to a GGUF model:
-
-```bash
-pip install llama-cpp-python
-```
-
-Then set in `settings.txt`:
-
-- `llm_enabled=true`
-- `llm_model_path=...` (GGUF path)
-
-VoiceTray also includes a minimal optional Settings GUI:
-
-- If `llm_enabled=true` but the runtime/model isn’t ready, it will open the Settings GUI on launch (Local LLM tab).
-- You can open it anytime from the tray menu: **Settings** or **LLM Setup**.
-
-## Technical Details
-
-### Dependencies
-
-- `speechrecognition`: Google Speech Recognition API (fallback)
-- `vosk`: Offline speech recognition
-- `sounddevice`: Direct audio capture for offline recognition
-- `pystray`: System tray functionality
-- `keyboard`: Global hotkey detection
-- `pyautogui`: Text insertion
-- `Pillow`: Icon image creation
-- `pyaudio`: Microphone audio capture (online mode)
-
-### Default Hotkey
-
-- **Windows**: `F9`
-- The hotkey can be customized by modifying the `self.hotkey` variable in the code
-
-### Privacy Note
-
-This application primarily uses offline speech recognition (Vosk), which means your audio is processed locally on your machine without being sent to external servers. If the offline model is unavailable, it falls back to Google's Speech Recognition service. No audio is stored locally by this application.
-
-## Future Enhancements
-
-- Customizable hotkeys through settings menu
-- Additional offline language models
-- Advanced grammar and spell checking
-- Voice commands for text formatting
-- Audio recording indicators
-- Configuration file for settings
-- Custom vocabulary and domain-specific terms
 
 ## License
 
-This project is open source. Feel free to modify and distribute as needed.
-
-## Support
-
-If you encounter issues:
-1. Check the troubleshooting section above
-2. Ensure all dependencies are properly installed
-3. Try running the application from command line to see error messages
-4. Verify microphone permissions in Windows settings
+VoiceTray is free and open source.
