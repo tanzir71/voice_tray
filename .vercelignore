@@ -1,0 +1,9 @@
+*
+!index.html
+!favicon.ico
+!llms.txt
+!readme.md
+!.nojekyll
+!demo
+!demo/**
+!vercel.json

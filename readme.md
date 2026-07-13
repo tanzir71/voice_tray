@@ -2,6 +2,13 @@
 
 **Wispr Flow magic, 100% offline and free.**
 
+## Website & demo
+
+- 🌐 Landing page: https://voicetray-offline.vercel.app/
+- ▶️ Offline dictation simulation: https://voicetray-offline.vercel.app/demo/
+
+The public demo uses canned cleanup examples. It requests no microphone permission and performs no audio capture, STT, network request, or foreground insertion.
+
 VoiceTray is a Windows tray dictation app that lets you speak messily and inserts clean, ready-to-send text into the app you were already using. It runs local speech recognition with faster-whisper, keeps raw and cleaned dictations in local SQLite history, and never sends your voice or text to a cloud service during dictation.
 
 ![VoiceTray dictation pill](assets/readme/pill-preview.gif)

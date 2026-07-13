@@ -1,0 +1,29 @@
+# VoiceTray
+
+VoiceTray is a free, open-source Windows tray dictation app. Hold F9, speak, and release to run local faster-whisper transcription, guarded local cleanup, local SQLite history, and safe insertion into the focused application.
+
+Website: https://voicetray-offline.vercel.app/
+Simulation: https://voicetray-offline.vercel.app/demo/
+Repository: https://github.com/tanzir71/voice_tray
+
+The public simulation is canned browser state. It requests no microphone access and performs no audio capture, STT, network request, or foreground insertion.
+
+## From source
+
+pip install -r requirements.txt
+python -B -m pytest tests\ -q
+python -B -m voicetray.eval
+pythonw -m voicetray
+
+Windows and a microphone are required for the real app. tools/build.ps1 creates the one-folder packaged application.
+
+## Dictation path
+
+1. F9 hold or lock mode records locally with VAD and a floating pill.
+2. faster-whisper transcribes using base, small, or medium.
+3. Deterministic rules remove fillers/repetitions, apply spoken punctuation/lists, and handle backtracking.
+4. An optional local GGUF LLM can polish text; risky edits fail validation and fall back to rules.
+5. Per-app profiles, local glossary, and snippets refine output.
+6. Raw and clean text are saved in local SQLite before safe foreground insertion.
+
+The runtime dictation path has zero network calls, telemetry, or cloud fallback. Network is used only for explicit model downloads. VoiceTray is Windows-only in v1, has no command mode, and local accuracy/speed depends on model size and hardware.
