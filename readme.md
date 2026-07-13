@@ -23,6 +23,40 @@ VoiceTray is a Windows tray dictation app that lets you speak messily and insert
 - Configure hotkeys, autostart, cleanup modes, app profiles, dictionary, snippets, and models from the in-process Settings window.
 - Stay offline at runtime: local STT, local cleanup rules, optional local GGUF cleanup model, local logs, and local history.
 
+## Architecture
+
+```
+        you hold F9 and speak
+                │
+                ▼
+┌────────────────── VoiceTray (Python, Windows tray) ──────────────────┐
+│                                                                       │
+│  global hotkey hook (F9 hold · F9 tap = lock · F10 = history-only)    │
+│        │                                                              │
+│  mic capture ──► floating pill UI (level, elapsed, state)             │
+│        │                                                              │
+│        ▼                                                              │
+│  faster-whisper (LOCAL speech-to-text; base/small/medium models)      │
+│        │  raw transcript                                              │
+│        ▼                                                              │
+│  cleanup pipeline:                                                    │
+│   1. deterministic rules — fillers, repetitions, spoken punctuation,  │
+│      lists, backtracking ("no wait, make that…")                       │
+│   2. optional local GGUF LLM polish (validated; falls back to rules   │
+│      if an edit looks risky)                                          │
+│   3. per-app profile tone (email / chat / notes / code comments)      │
+│      + personal dictionary + snippet expansion                        │
+│        │  clean text                                                  │
+│        ▼                                                              │
+│  text insertion into the foreground app (Notepad, VS Code, Chrome,    │
+│  Slack, terminals…)                                                   │
+│                                                                       │
+│  SQLite history (raw + cleaned) · settings · glossary — all local     │
+└───────────────────────────────────────────────────────────────────────┘
+```
+
+Everything on this diagram runs on your machine. There is no network call in the dictation path — models are downloaded once, when you choose them.
+
 ## Honest Comparison
 
 VoiceTray aims for the feel of polished cloud dictation while taking the opposite privacy and pricing tradeoff.
